@@ -1,0 +1,107 @@
+@startuml "GameOfThrones-MAS"
+
+enum House {
+  Tagerien
+  Stark
+  Lanister
+  MarcheurBlanc
+}
+
+
+class Simulation {
+  # Map : Map
+  + moovingBeing : List<LivingBeing>
+}
+
+class ConsoleDisplay {
+  + render(map: Map)
+}
+
+
+class Map {
+  - height : int
+  - width : int
+  - tiles : Tile [][]
+  - placeEntity(entity: Entity, position: Position)
+  - createSafeZones() : void
+  + get/set()
+  + getSafeZone(house: House)
+  + moveEntity(entity: Entity, position: Position)
+}
+
+class Tile {
+  - position : Position
+  - occupant : Entity
+  - zoneOwner : House
+  + get/set()
+}
+
+class Position {
+  - x : int
+  - y : int
+  + get/set()
+}
+
+abstract class Entity {
+  - position : Position
+  - symbol : char
+  +getSymbol() : char
+}
+' Empty, Rock, LanisterMaster, lansiter, StarkMaster...
+' .#LlSsTtMm
+
+
+' messages = listes des messages connue
+abstract class LivingBeing {
+  + EPs : int
+  + message : Strings()
+  + move()
+}
+
+interface Master
+
+abstract class Good
+abstract class Bad
+
+class TagerienMaster <<Singleton>>
+class StarkMaster <<Singleton>>
+class LanisterMaster <<Singleton>>
+class MarcheurBlancMaster <<Singleton>>
+
+
+
+'================================
+
+Simulation "1" *-- "1" Map
+Simulation "1" o-- "*" LivingBeing
+Simulation ..> ConsoleDisplay
+
+Map "1" *-- "*" Tile
+Tile *-- Entity
+
+Position "1" --* "1" Tile
+Position "1" --> "1" LivingBeing
+
+Entity <|-- LivingBeing
+Entity <|-- Rock
+
+LivingBeing <|-- Good
+LivingBeing <|-- Bad
+
+Good <|-- Tagerien
+Good <|-- Stark
+Bad <|-- Lanister
+Bad <|-- MarcheurBlanc
+
+
+Tagerien <|-- TagerienMaster
+Stark <|-- StarkMaster
+Lanister <|-- LanisterMaster
+MarcheurBlanc <|-- MarcheurBlancMaster
+ 
+TagerienMaster <|.. Master 
+StarkMaster <|.. Master 
+LanisterMaster <|.. Master 
+MarcheurBlancMaster <|.. Master
+
+@enduml

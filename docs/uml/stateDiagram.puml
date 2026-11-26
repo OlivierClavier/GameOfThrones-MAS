@@ -1,0 +1,32 @@
+@startuml
+title Diagramme d'états d'un agent mobile
+' Diagramme d'états-transitions d'un agent mobile (méthode LivingBeing.move).
+skinparam stateBorderColor #555555
+
+state "Exploration" as Exploration
+Exploration : direction et distance tirées au hasard
+Exploration : perd des EP à chaque case hors de sa SafeZone
+
+state "Retour" as Retour
+Retour : se dirige vers sa SafeZone
+Retour : (Map.getDirectionToSafeZone)
+
+state "Repos" as Repos
+Repos : immobile à côté de son Maître
+Repos : récupère des EP à chaque pas
+
+state "Épuisé" as Epuise
+Epuise : devient un obstacle
+Epuise : perd tous ses messages
+
+[*] --> Exploration : placé dans sa SafeZone,\nEP au maximum
+Exploration --> Exploration : rencontre (partage, échange,\nconfrontation) ou obstacle
+Exploration --> Retour : EP < 20 %
+Retour --> Retour : bloqué : essaie\nune autre direction
+Retour --> Repos : arrivé à côté\nde son Maître
+Retour --> Exploration : EP >= 80 %\ndans sa SafeZone
+Repos --> Exploration : EP >= 80 %
+Exploration --> Epuise : EP = 0
+Retour --> Epuise : EP = 0
+Epuise --> [*]
+@enduml

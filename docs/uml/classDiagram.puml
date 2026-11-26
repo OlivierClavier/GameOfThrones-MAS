@@ -1,107 +1,417 @@
-@startuml "GameOfThrones-MAS"
+@startuml
+title Diagramme de classes — GameOfThrones MAS
+' Diagramme de classes complet : tous les attributs et toutes les méthodes, avec leur visibilité.
+' + public   - private   # protected   ~ package   {static} statique   {abstract} abstrait
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+hide empty members
 
-enum House {
-  Tagerien
-  Stark
-  Lanister
-  MarcheurBlanc
+package "fr.junia.got" {
+  class Main {
+    + {static} main(args : String[]) : void
+  }
 }
 
-
-class Simulation {
-  # Map : Map
-  + moovingBeing : List<LivingBeing>
+package "fr.junia.got.util" {
+  class RandomGenerator <<Singleton>> {
+    - {static} instance : RandomGenerator
+    - random : Random
+    - RandomGenerator(seed : long)
+    + {static} getInstance() : RandomGenerator
+    + {static} reseed(seed : long) : void
+    + nextInt(bound : int) : int
+    + between(min : int, max : int) : int
+    + chance(p : double) : boolean
+    + shuffle(list : List<?>) : void
+    + pick(list : List<T>) : T
+  }
 }
 
-class ConsoleDisplay {
-  + render(map: Map)
+package "fr.junia.got.simulation" {
+  class Config <<final>> {
+    + {static} SEED : long = 42
+    + {static} WIDTH : int = 30
+    + {static} HEIGHT : int = 20
+    + {static} SAFE_ZONE_WIDTH : int = 7
+    + {static} SAFE_ZONE_HEIGHT : int = 5
+    + {static} ROCK_RATE : double = 0.06
+    + {static} AGENTS_PER_HOUSE : int = 6
+    + {static} MESSAGES_PER_HOUSE : int = 10
+    + {static} MAX_EP : int = 100
+    + {static} EP_RECHARGE_PER_STEP : int = 20
+    + {static} LOW_EP_RATIO : double = 0.20
+    + {static} LEAVE_SAFE_ZONE_RATIO : double = 0.80
+    + {static} MAX_ALLY_EXCHANGE : int = 3
+    + {static} MAX_STOLEN_MESSAGES : int = 3
+    + {static} MAX_STEPS : int = 300
+    + {static} DELAY_MS : int = 150
+    - Config()
+  }
+
+  class Simulation {
+    - map : Map
+    - movingBeings : List<LivingBeing>
+    - masters : List<Master>
+    - totalMessages : int
+    - display : ConsoleDisplay
+    - log : EventLog
+    - delayMs : int
+    - step : int
+    + Simulation(map : Map, movingBeings : List<LivingBeing>, masters : List<Master>, totalMessages : int, display : ConsoleDisplay, delayMs : int)
+    + run() : void
+    - playStep() : void
+    + getEndReason() : EndReason
+    + getWinner() : Master
+    + countActive() : int
+    - pause() : void
+    + getMap() : Map
+    + getStep() : int
+    + getMovingBeings() : List<LivingBeing>
+    + getMasters() : List<Master>
+    + getTotalMessages() : int
+    + getLog() : EventLog
+  }
+
+  enum EndReason {
+    ALL_MESSAGES_COLLECTED
+    ALL_AGENTS_EXHAUSTED
+    MAX_STEPS_REACHED
+  }
+
+  class WorldBuilder <<final>> {
+    - WorldBuilder()
+    + {static} build(display : ConsoleDisplay, delayMs : int) : Simulation
+    - {static} createMaster(house : House) : Master
+    - {static} createAgent(house : House, name : String) : LivingBeing
+  }
 }
 
+package "fr.junia.got.map" {
+  class Map {
+    - width : int
+    - height : int
+    - safeZoneWidth : int
+    - safeZoneHeight : int
+    - tiles : Tile[][]
+    + Map(width : int, height : int, safeZoneWidth : int, safeZoneHeight : int, rockRate : double)
+    - findZoneOwner(x : int, y : int) : House
+    - placeRocks(rockRate : double) : void
+    + getWidth() : int
+    + getHeight() : int
+    + isInside(p : Position) : boolean
+    + getTile(p : Position) : Tile
+    + getNeighbours(p : Position) : List<Tile>
+    + getSafeZoneCenter(house : House) : Position
+    + getDirectionToSafeZone(p : Position, house : House) : Direction
+    + isInSafeZone(p : Position, house : House) : boolean
+    + isInAnySafeZone(p : Position) : boolean
+    + canEnter(p : Position, house : House) : boolean
+    + placeEntity(entity : Entity, p : Position) : void
+    + moveEntity(entity : Entity, to : Position) : void
+    + getFreeSafeZoneTiles(house : House) : List<Tile>
+  }
 
-class Map {
-  - height : int
-  - width : int
-  - tiles : Tile [][]
-  - placeEntity(entity: Entity, position: Position)
-  - createSafeZones() : void
-  + get/set()
-  + getSafeZone(house: House)
-  + moveEntity(entity: Entity, position: Position)
+  class Tile {
+    - position : Position
+    - zoneOwner : House
+    - occupant : Entity
+    + Tile(position : Position, zoneOwner : House)
+    + getPosition() : Position
+    + getZoneOwner() : House
+    + getOccupant() : Entity
+    ~ setOccupant(occupant : Entity) : void
+    + isFree() : boolean
+    + isSafeZone() : boolean
+  }
+
+  class Position <<record>> {
+    - x : int
+    - y : int
+    + x() : int
+    + y() : int
+    + next(direction : Direction) : Position
+    + distanceTo(other : Position) : int
+    + toString() : String
+  }
+
+  enum Direction {
+    NORTH
+    NORTH_EAST
+    EAST
+    SOUTH_EAST
+    SOUTH
+    SOUTH_WEST
+    WEST
+    NORTH_WEST
+    - dx : int
+    - dy : int
+    + getDx() : int
+    + getDy() : int
+    + {static} fromDelta(dx : int, dy : int) : Direction
+    + {static} random() : Direction
+    + {static} randomExcept(excluded : Direction) : Direction
+  }
 }
 
-class Tile {
-  - position : Position
-  - occupant : Entity
-  - zoneOwner : House
-  + get/set()
+package "fr.junia.got.entity" {
+  abstract class Entity {
+    - position : Position
+    + getPosition() : Position
+    + setPosition(position : Position) : void
+    + {abstract} getSymbol() : char
+    + {abstract} isObstacle() : boolean
+  }
+
+  class Rock {
+    - {static} count : int
+    + Rock()
+    + {static} getCount() : int
+    + getSymbol() : char
+    + isObstacle() : boolean
+  }
+
+  abstract class LivingBeing {
+    - {static} count : int
+    - name : String
+    - messages : MessageBag
+    - ep : int
+    - lastDirection : Direction
+    - blockedLastTurn : boolean
+    - returningHome : boolean
+    - exhausted : boolean
+    # LivingBeing(name : String)
+    + {static} getCount() : int
+    + {abstract} getHouse() : House
+    + {abstract} getMaster() : Master
+    + {abstract} isAlly(other : LivingBeing) : boolean
+    # {abstract} getMaxDistance() : int
+    # {abstract} getCostPerTile() : int
+    + {abstract} getAttack() : int
+    + {abstract} getDefense() : int
+    + getMaxEp() : int
+    + move(map : Map, log : EventLog) : void
+    - walk(map : Map, direction : Direction, distance : int, log : EventLog) : void
+    - hitObstacle(map : Map, remainingTiles : int, log : EventLog) : void
+    - becomeExhausted(log : EventLog) : void
+    - isNextToMaster() : boolean
+    - spendEp(amount : int) : void
+    - recharge() : void
+    + getName() : String
+    + getMessages() : MessageBag
+    + getEp() : int
+    + getLastDirection() : Direction
+    + isReturningHome() : boolean
+    + isExhausted() : boolean
+    + isActive() : boolean
+    + getSymbol() : char
+    + isObstacle() : boolean
+  }
+
+  abstract class Good {
+    # Good(name : String)
+    + isAlly(other : LivingBeing) : boolean
+  }
+
+  abstract class Bad {
+    # Bad(name : String)
+    + isAlly(other : LivingBeing) : boolean
+  }
+
+  interface Master {
+    + getName() : String
+    + getHouse() : House
+    + getPosition() : Position
+    + getMessages() : MessageBag
+    + collect(courier : LivingBeing) : int
+    + getScore() : int
+  }
+
+  enum House {
+    STARK
+    TARGARYEN
+    LANNISTER
+    WHITE_WALKER
+    - displayName : String
+    - agentSymbol : char
+    - masterSymbol : char
+    + getDisplayName() : String
+    + getAgentSymbol() : char
+    + getMasterSymbol() : char
+  }
 }
 
-class Position {
-  - x : int
-  - y : int
-  + get/set()
+package "fr.junia.got.entity.house" {
+  class Stark {
+    - {static} count : int
+    + Stark(name : String)
+    + {static} getCount() : int
+    + getHouse() : House
+    + getMaster() : Master
+    # getMaxDistance() : int
+    # getCostPerTile() : int
+    + getAttack() : int
+    + getDefense() : int
+  }
+
+  class Targaryen {
+    - {static} count : int
+    + Targaryen(name : String)
+    + {static} getCount() : int
+    + getHouse() : House
+    + getMaster() : Master
+    # getMaxDistance() : int
+    # getCostPerTile() : int
+    + getAttack() : int
+    + getDefense() : int
+  }
+
+  class Lannister {
+    - {static} count : int
+    + Lannister(name : String)
+    + {static} getCount() : int
+    + getHouse() : House
+    + getMaster() : Master
+    # getMaxDistance() : int
+    # getCostPerTile() : int
+    + getAttack() : int
+    + getDefense() : int
+  }
+
+  class WhiteWalker {
+    - {static} count : int
+    + WhiteWalker(name : String)
+    + {static} getCount() : int
+    + getHouse() : House
+    + getMaster() : Master
+    + getMaxEp() : int
+    # getMaxDistance() : int
+    # getCostPerTile() : int
+    + getAttack() : int
+    + getDefense() : int
+  }
+
+  class StarkMaster <<Singleton>> {
+    - {static} instance : StarkMaster
+    - StarkMaster()
+    + {static} getInstance() : StarkMaster
+    + move(map : Map, log : EventLog) : void
+    + getSymbol() : char
+  }
+
+  class TargaryenMaster <<Singleton>> {
+    - {static} instance : TargaryenMaster
+    - TargaryenMaster()
+    + {static} getInstance() : TargaryenMaster
+    + move(map : Map, log : EventLog) : void
+    + getSymbol() : char
+  }
+
+  class LannisterMaster <<Singleton>> {
+    - {static} instance : LannisterMaster
+    - LannisterMaster()
+    + {static} getInstance() : LannisterMaster
+    + move(map : Map, log : EventLog) : void
+    + getSymbol() : char
+  }
+
+  class WhiteWalkerMaster <<Singleton>> {
+    - {static} instance : WhiteWalkerMaster
+    - WhiteWalkerMaster()
+    + {static} getInstance() : WhiteWalkerMaster
+    + move(map : Map, log : EventLog) : void
+    + getSymbol() : char
+  }
 }
 
-abstract class Entity {
-  - position : Position
-  - symbol : char
-  +getSymbol() : char
+package "fr.junia.got.interaction" {
+  class MessageBag {
+    - messages : List<String>
+    + add(message : String) : boolean
+    + addAll(other : MessageBag) : int
+    + copyRandomMissing(source : MessageBag, max : int) : int
+    + takeRandomMissing(source : MessageBag, max : int) : int
+    - pickMissing(source : MessageBag, max : int) : List<String>
+    + contains(message : String) : boolean
+    + size() : int
+    + clear() : void
+    + asList() : List<String>
+  }
+
+  class Encounter <<final>> {
+    - Encounter()
+    + {static} resolve(mover : LivingBeing, other : LivingBeing, map : Map, log : EventLog) : void
+    + {static} deliverIfNearMaster(being : LivingBeing, map : Map, log : EventLog) : void
+    - {static} deliver(courier : LivingBeing, master : Master, log : EventLog) : void
+    - {static} shareAll(a : LivingBeing, b : LivingBeing, log : EventLog) : void
+    - {static} exchange(a : LivingBeing, b : LivingBeing, log : EventLog) : void
+    - {static} confront(attacker : LivingBeing, defender : LivingBeing, log : EventLog) : void
+  }
 }
-' Empty, Rock, LanisterMaster, lansiter, StarkMaster...
-' .#LlSsTtMm
 
+package "fr.junia.got.display" {
+  class ConsoleDisplay {
+    - {static} MAX_EVENTS_SHOWN : int = 8
+    - quiet : boolean
+    + ConsoleDisplay(quiet : boolean)
+    + showIntro(simulation : Simulation) : void
+    + render(simulation : Simulation) : void
+    + showResult(simulation : Simulation) : void
+    - appendMap(out : StringBuilder, map : Map) : void
+    - symbolOf(tile : Tile) : char
+    - appendHouses(out : StringBuilder, simulation : Simulation) : void
+    - appendInstances(out : StringBuilder) : void
+    - appendEvents(out : StringBuilder, events : List<String>) : void
+  }
 
-' messages = listes des messages connue
-abstract class LivingBeing {
-  + EPs : int
-  + message : Strings()
-  + move()
+  class EventLog {
+    - events : List<String>
+    - total : int
+    + add(event : String) : void
+    + getEvents() : List<String>
+    + clear() : void
+    + getTotal() : int
+  }
 }
 
-interface Master
-
-abstract class Good
-abstract class Bad
-
-class TagerienMaster <<Singleton>>
-class StarkMaster <<Singleton>>
-class LanisterMaster <<Singleton>>
-class MarcheurBlancMaster <<Singleton>>
-
-
-
-'================================
-
-Simulation "1" *-- "1" Map
-Simulation "1" o-- "*" LivingBeing
-Simulation ..> ConsoleDisplay
-
-Map "1" *-- "*" Tile
-Tile *-- Entity
-
-Position "1" --* "1" Tile
-Position "1" --> "1" LivingBeing
-
-Entity <|-- LivingBeing
+' ----- Héritage et réalisation -----
 Entity <|-- Rock
-
+Entity <|-- LivingBeing
 LivingBeing <|-- Good
 LivingBeing <|-- Bad
-
-Good <|-- Tagerien
 Good <|-- Stark
-Bad <|-- Lanister
-Bad <|-- MarcheurBlanc
-
-
-Tagerien <|-- TagerienMaster
+Good <|-- Targaryen
+Bad <|-- Lannister
+Bad <|-- WhiteWalker
 Stark <|-- StarkMaster
-Lanister <|-- LanisterMaster
-MarcheurBlanc <|-- MarcheurBlancMaster
- 
-TagerienMaster <|.. Master 
-StarkMaster <|.. Master 
-LanisterMaster <|.. Master 
-MarcheurBlancMaster <|.. Master
+Targaryen <|-- TargaryenMaster
+Lannister <|-- LannisterMaster
+WhiteWalker <|-- WhiteWalkerMaster
+Master <|.. StarkMaster
+Master <|.. TargaryenMaster
+Master <|.. LannisterMaster
+Master <|.. WhiteWalkerMaster
 
+' ----- Associations -----
+Simulation *-- "1" Map
+Simulation o-- "*" LivingBeing : movingBeings
+Simulation o-- "4" Master : masters
+Simulation *-- "1" EventLog
+Simulation --> "1" ConsoleDisplay
+Simulation +-- EndReason
+Map *-- "*" Tile
+Tile o-- "0..1" Entity : occupant
+Tile --> "0..1" House : zoneOwner
+Entity --> "1" Position
+LivingBeing *-- "1" MessageBag : messages
+LivingBeing --> "0..1" Direction : lastDirection
+
+' ----- Dépendances -----
+Main ..> WorldBuilder
+WorldBuilder ..> Simulation : crée
+LivingBeing ..> Encounter : rencontres
+Encounter ..> MessageBag
+ConsoleDisplay ..> Simulation
+Map ..> RandomGenerator
+LivingBeing ..> RandomGenerator
+Encounter ..> RandomGenerator
 @enduml

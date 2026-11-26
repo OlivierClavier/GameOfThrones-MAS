@@ -7,21 +7,18 @@ du royaume sur une carte en 2D. Le Maître de chaque maison reste dans sa SafeZo
 parcourent la carte pour lui rapporter des messages. La maison dont le Maître réunit le plus de messages
 distincts gagne la partie.
 
-![Interface graphique](docs/screenshot.png)
-
 ## Lancer le projet
 
 Prérequis : JDK 21 et Maven (IntelliJ inclut Maven). Le `.jar` de chaque version est aussi disponible dans les Releases GitHub.
 
 ```bash
 mvn package
-java -jar target/got-mas.jar --gui
+java -jar target/got-mas.jar
 ```
 
 | Option | Effet |
 | --- | --- |
-| `--gui` | Fenêtre graphique, avec pause, pas à pas et réglage de la vitesse |
-| `--fast` | Console sans pause entre deux affichages |
+| `--fast` | Sans pause entre deux affichages |
 | `--quiet` | N'affiche que le résultat final |
 | `--seed 7` | Joue une autre partie (même graine = même partie) |
 
@@ -56,7 +53,6 @@ Tous les réglages sont dans `Config.java`. Sur 60 parties (graines 1 à 60) : S
 - **Polymorphisme** : chaque maison redéfinit sa distance, son coût, son attaque et sa défense ; la boucle appelle `move()` sans savoir quelle maison joue.
 - **Attributs statiques** : un compteur d'instances par classe, affiché à chaque pas.
 - **Singleton** : les 4 Maîtres et le générateur aléatoire.
-- **Stratégie** : `ConsoleDisplay` et `SwingDisplay` implémentent `Display` ; le moteur ne connaît que l'interface.
 
 ## Structure du code
 
@@ -69,7 +65,7 @@ src/main/java/fr/junia/got/
 ├── entity/       Entity, Rock, LivingBeing, Good, Bad, Master, House
 │   └── house/    Stark, Targaryen, Lannister, WhiteWalker et leurs 4 Maîtres
 ├── interaction/  MessageBag, Encounter
-└── display/      Display, ConsoleDisplay, SwingDisplay, WorldView, StepSnapshot, EventLog
+└── display/      ConsoleDisplay, EventLog
 ```
 
 ## Diagrammes UML

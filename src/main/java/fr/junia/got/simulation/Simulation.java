@@ -1,6 +1,6 @@
 package fr.junia.got.simulation;
 
-import fr.junia.got.display.ConsoleDisplay;
+import fr.junia.got.display.Display;
 import fr.junia.got.display.EventLog;
 import fr.junia.got.entity.LivingBeing;
 import fr.junia.got.entity.Master;
@@ -26,13 +26,13 @@ public class Simulation {
     private final List<LivingBeing> movingBeings;
     private final List<Master> masters;
     private final int totalMessages;
-    private final ConsoleDisplay display;
+    private final Display display;
     private final EventLog log = new EventLog();
     private final int delayMs;
     private int step;
 
     public Simulation(Map map, List<LivingBeing> movingBeings, List<Master> masters, int totalMessages,
-                      ConsoleDisplay display, int delayMs) {
+                      Display display, int delayMs) {
         this.map = map;
         this.movingBeings = new ArrayList<>(movingBeings);
         this.masters = new ArrayList<>(masters);

@@ -1,6 +1,6 @@
 package fr.junia.got.simulation;
 
-import fr.junia.got.display.ConsoleDisplay;
+import fr.junia.got.display.Display;
 import fr.junia.got.entity.Entity;
 import fr.junia.got.entity.House;
 import fr.junia.got.entity.LivingBeing;
@@ -30,7 +30,7 @@ public final class WorldBuilder {
     }
 
     /** Construit une simulation prête à être lancée. */
-    public static Simulation build(ConsoleDisplay display, int delayMs) {
+    public static Simulation build(Display display, int delayMs) {
         Map map = new Map(Config.WIDTH, Config.HEIGHT, Config.SAFE_ZONE_WIDTH, Config.SAFE_ZONE_HEIGHT,
                 Config.ROCK_RATE);
         List<LivingBeing> agents = new ArrayList<>();

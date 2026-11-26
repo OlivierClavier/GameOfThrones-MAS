@@ -53,11 +53,11 @@ package "fr.junia.got.simulation" {
     - movingBeings : List<LivingBeing>
     - masters : List<Master>
     - totalMessages : int
-    - display : ConsoleDisplay
+    - display : Display
     - log : EventLog
     - delayMs : int
     - step : int
-    + Simulation(map : Map, movingBeings : List<LivingBeing>, masters : List<Master>, totalMessages : int, display : ConsoleDisplay, delayMs : int)
+    + Simulation(map : Map, movingBeings : List<LivingBeing>, masters : List<Master>, totalMessages : int, display : Display, delayMs : int)
     + run() : void
     - playStep() : void
     + getEndReason() : EndReason
@@ -80,7 +80,7 @@ package "fr.junia.got.simulation" {
 
   class WorldBuilder <<final>> {
     - WorldBuilder()
-    + {static} build(display : ConsoleDisplay, delayMs : int) : Simulation
+    + {static} build(display : Display, delayMs : int) : Simulation
     - {static} createMaster(house : House) : Master
     - {static} createAgent(house : House, name : String) : LivingBeing
   }
@@ -396,7 +396,7 @@ Simulation *-- "1" Map
 Simulation o-- "*" LivingBeing : movingBeings
 Simulation o-- "4" Master : masters
 Simulation *-- "1" EventLog
-Simulation --> "1" ConsoleDisplay
+Simulation --> "1" Display
 Simulation +-- EndReason
 Map *-- "*" Tile
 Tile o-- "0..1" Entity : occupant
@@ -414,4 +414,102 @@ ConsoleDisplay ..> Simulation
 Map ..> RandomGenerator
 LivingBeing ..> RandomGenerator
 Encounter ..> RandomGenerator
+
+' ----- Interface graphique (v1.1.0) : patron Stratégie pour l'affichage -----
+package "fr.junia.got.display" {
+  interface Display <<Strategy>> {
+    + showIntro(simulation : Simulation) : void
+    + render(simulation : Simulation) : void
+    + showResult(simulation : Simulation) : void
+  }
+
+  class SwingDisplay {
+    - lock : Object
+    - delayMs : int
+    - paused : boolean
+    - stepRequested : boolean
+    - view : WorldView
+    - pauseButton : JButton
+    - stepButton : JButton
+    + showIntro(simulation : Simulation) : void
+    + render(simulation : Simulation) : void
+    + showResult(simulation : Simulation) : void
+    - buildWindow(simulation : Simulation) : void
+    - publish(snapshot : StepSnapshot) : void
+    - waitBeforeNextStep() : void
+    - togglePause() : void
+    - requestStep() : void
+    - {static} resultText(simulation : Simulation) : String
+    - {static} runOnSwingThread(task : Runnable) : void
+  }
+
+  class WorldView {
+    - {static} TILE : int = 26
+    - {static} MARGIN : int = 20
+    - {static} TOP : int = 70
+    - {static} SIDEBAR_WIDTH : int = 370
+    - {static} CARD_HEIGHT : int = 80
+    - {static} CARD_GAP : int = 10
+    - {static} HISTORY_SIZE : int = 9
+    - {static} BACKGROUND, PARCHMENT, GRID, BORDER, INK, MUTED, ROCK, EXHAUSTED, TRACK : Color
+    - columns : int
+    - rows : int
+    - history : Deque<String>
+    - snapshot : StepSnapshot
+    - lastStep : int
+    + WorldView(columns : int, rows : int)
+    + {static} colorOf(house : House) : Color
+    + update(next : StepSnapshot) : void
+    # paintComponent(graphics : Graphics) : void
+    - paintHeader(g : Graphics2D) : void
+    - paintMap(g : Graphics2D) : void
+    - paintZoneBorders(g : Graphics2D) : void
+    - paintCell(g : Graphics2D, symbol : char, x : int, y : int) : void
+    - paintAgent(g : Graphics2D, house : House, x : int, y : int) : void
+    - paintMaster(g : Graphics2D, house : House, x : int, y : int) : void
+    - paintLegend(g : Graphics2D) : void
+    - paintHouses(g : Graphics2D) : void
+    - paintHouseCard(g : Graphics2D, stats : HouseStats, leader : boolean, x : int, y : int, width : int) : void
+    - paintHistory(g : Graphics2D) : void
+    - {static} houseOf(event : String) : House
+    - paintResult(g : Graphics2D) : void
+    - {static} withAlpha(color : Color, alpha : int) : Color
+    - {static} drawRight(g : Graphics2D, text : String, right : int, baseline : int) : void
+    - {static} drawCentered(g : Graphics2D, text : String, center : int, baseline : int) : void
+    - {static} fit(text : String, maxWidth : int, metrics : FontMetrics) : String
+  }
+
+  class StepSnapshot <<record>> {
+    - step : int
+    - maxSteps : int
+    - totalMessages : int
+    - activeAgents : int
+    - cells : char[][]
+    - zones : House[][]
+    - houses : List<HouseStats>
+    - events : List<String>
+    - result : String
+    + {static} of(simulation : Simulation, result : String) : StepSnapshot
+  }
+
+  class HouseStats <<record>> {
+    - house : House
+    - masterName : String
+    - score : int
+    - active : int
+    - exhausted : int
+    - energyPercent : int
+  }
+}
+
+class "javax.swing.JPanel" as JPanel
+
+Display <|.. ConsoleDisplay
+Display <|.. SwingDisplay
+JPanel <|-- WorldView
+SwingDisplay *-- "1" WorldView
+SwingDisplay ..> StepSnapshot : crée
+WorldView ..> StepSnapshot : dessine
+StepSnapshot +-- HouseStats
+Main ..> Display : choisit
 @enduml

@@ -16,7 +16,7 @@ import fr.junia.got.simulation.Simulation;
 import java.util.List;
 
 /** Affichage de la simulation dans la console, en caractères ASCII. */
-public class ConsoleDisplay {
+public class ConsoleDisplay implements Display {
 
     /** Nombre maximum d'événements affichés par pas. */
     private static final int MAX_EVENTS_SHOWN = 8;

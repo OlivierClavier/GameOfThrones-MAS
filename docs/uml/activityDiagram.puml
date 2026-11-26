@@ -1,0 +1,40 @@
+@startuml
+title Diagramme d’activité de l’algorithme global
+' Diagramme d'activité : boucle des pas de temps (Simulation.run)
+' et boucle de déplacement d'un agent (LivingBeing.move).
+start
+:Créer la carte, ses SafeZones et ses rochers;
+:Placer les 4 Maîtres (singletons) au centre de leur SafeZone,\npuis leurs agents autour d'eux;
+:Distribuer les messages de départ aux agents;
+while (Partie en cours ?\naucun Maître n'a tous les messages,\nil reste des agents actifs, pas < MAX_STEPS) is (oui)
+  :pas = pas + 1;
+  :Mélanger la liste des agents mobiles;
+  while (Reste-t-il un agent à faire jouer ?) is (oui)
+    if (Agent actif ?) then (oui)
+      if (Dans sa SafeZone ?) then (oui)
+        :Récupérer des EP;
+      endif
+      if (EP < 20 % ou retour en cours ?) then (oui)
+        :Direction = vers sa SafeZone;
+      else (non)
+        :Direction et distance tirées au hasard\n(différente de la dernière si l'agent était bloqué);
+      endif
+      while (Cases restantes et case suivante libre ?) is (oui)
+        :Avancer d'une case\n(perdre des EP hors de sa SafeZone);
+        :Livrer ses messages si son Maître est voisin;
+      endwhile (non)
+      if (Arrêté par un être vivant sur son chemin ?) then (oui)
+        :Rencontre : union (même maison),\néchange (alliés) ou confrontation (ennemis);
+      elseif (Arrêté par un obstacle ?) then (oui)
+        :Perdre les EP du trajet restant;
+      endif
+      if (EP = 0 ?) then (oui)
+        :Devenir un obstacle et perdre ses messages;
+      endif
+    endif
+  endwhile (non)
+  :Afficher la carte, les scores, les instances et les événements;
+endwhile (non)
+:Afficher le vainqueur ou le match nul;
+stop
+@enduml

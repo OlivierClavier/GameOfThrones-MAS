@@ -2,8 +2,17 @@
 title Diagramme de classes — GameOfThrones MAS
 ' Diagramme de classes complet : tous les attributs et toutes les méthodes, avec leur visibilité.
 ' + public   - private   # protected   ~ package   {static} statique   {abstract} abstrait
+' Mise en page Smetana : fonctionne sans Graphviz.
+!pragma layout smetana
+' Noms de paquets complets, sans imbrication fr > junia > got.
+set separator none
+skinparam monochrome true
+skinparam defaultFontName Arial
+skinparam shadowing false
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
+skinparam nodesep 40
+skinparam ranksep 50
 hide empty members
 
 package "fr.junia.got" {
@@ -371,52 +380,7 @@ package "fr.junia.got.display" {
     + clear() : void
     + getTotal() : int
   }
-}
 
-' ----- Héritage et réalisation -----
-Entity <|-- Rock
-Entity <|-- LivingBeing
-LivingBeing <|-- Good
-LivingBeing <|-- Bad
-Good <|-- Stark
-Good <|-- Targaryen
-Bad <|-- Lannister
-Bad <|-- WhiteWalker
-Stark <|-- StarkMaster
-Targaryen <|-- TargaryenMaster
-Lannister <|-- LannisterMaster
-WhiteWalker <|-- WhiteWalkerMaster
-Master <|.. StarkMaster
-Master <|.. TargaryenMaster
-Master <|.. LannisterMaster
-Master <|.. WhiteWalkerMaster
-
-' ----- Associations -----
-Simulation *-- "1" Map
-Simulation o-- "*" LivingBeing : movingBeings
-Simulation o-- "4" Master : masters
-Simulation *-- "1" EventLog
-Simulation --> "1" Display
-Simulation +-- EndReason
-Map *-- "*" Tile
-Tile o-- "0..1" Entity : occupant
-Tile --> "0..1" House : zoneOwner
-Entity --> "1" Position
-LivingBeing *-- "1" MessageBag : messages
-LivingBeing --> "0..1" Direction : lastDirection
-
-' ----- Dépendances -----
-Main ..> WorldBuilder
-WorldBuilder ..> Simulation : crée
-LivingBeing ..> Encounter : rencontres
-Encounter ..> MessageBag
-ConsoleDisplay ..> Simulation
-Map ..> RandomGenerator
-LivingBeing ..> RandomGenerator
-Encounter ..> RandomGenerator
-
-' ----- Interface graphique (v1.1.0) : patron Stratégie pour l'affichage -----
-package "fr.junia.got.display" {
   interface Display <<Strategy>> {
     + showIntro(simulation : Simulation) : void
     + render(simulation : Simulation) : void
@@ -504,12 +468,65 @@ package "fr.junia.got.display" {
 
 class "javax.swing.JPanel" as JPanel
 
-Display <|.. ConsoleDisplay
-Display <|.. SwingDisplay
-JPanel <|-- WorldView
-SwingDisplay *-- "1" WorldView
-SwingDisplay ..> StepSnapshot : crée
-WorldView ..> StepSnapshot : dessine
-StepSnapshot +-- HouseStats
-Main ..> Display : choisit
+' ----- Mise en page -----
+' Les directions (-down-, -right-...) et les liens cachés ne changent pas le sens UML :
+' ils servent seulement à placer les classes pour limiter les croisements.
+' Ligne du haut : point d'entrée, construction, moteur, affichage.
+Main .right.> WorldBuilder
+WorldBuilder .right.> Simulation : crée
+Simulation -right-> "1" Display
+ConsoleDisplay .up.> Simulation
+Simulation *-right- "1" EventLog
+Simulation +-up- EndReason
+Config -[hidden]right- Main
+Main .[hidden]down. RandomGenerator
+
+' ----- Associations -----
+Simulation *-down- "1" Map
+Simulation o-down- "*" LivingBeing : movingBeings
+Simulation o-- "4" Master : masters
+Map *-down- "*" Tile
+Tile o-right- "0..1" Entity : occupant
+Tile -down-> "0..1" House : zoneOwner
+Entity -left-> "1" Position
+LivingBeing *-right- "1" MessageBag : messages
+LivingBeing -left-> "0..1" Direction : lastDirection
+
+' ----- Héritage et réalisation -----
+Entity <|-down- Rock
+Entity <|-down- LivingBeing
+LivingBeing <|-down- Good
+LivingBeing <|-down- Bad
+Good <|-down- Stark
+Good <|-down- Targaryen
+Bad <|-down- Lannister
+Bad <|-down- WhiteWalker
+Stark <|-down- StarkMaster
+Targaryen <|-down- TargaryenMaster
+Lannister <|-down- LannisterMaster
+WhiteWalker <|-down- WhiteWalkerMaster
+' Master à droite de Bad : les flèches de réalisation restent courtes.
+Bad -[hidden]right- Master
+Master <|.. StarkMaster
+Master <|.. TargaryenMaster
+Master <|.. LannisterMaster
+Master <|.. WhiteWalkerMaster
+
+' ----- Dépendances -----
+Main .down.> Display : choisit
+LivingBeing .right.> Encounter : rencontres
+Encounter .down.> MessageBag
+Map .down.> RandomGenerator
+LivingBeing .down.> RandomGenerator
+Encounter .down.> RandomGenerator
+
+' ----- Interface graphique (v1.1.0) : patron Stratégie pour l'affichage -----
+Display <|.down. ConsoleDisplay
+Display <|.down. SwingDisplay
+ConsoleDisplay -[hidden]right- SwingDisplay
+SwingDisplay *-down- "1" WorldView
+JPanel <|-down- WorldView
+SwingDisplay .right.> StepSnapshot : crée
+WorldView .right.> StepSnapshot : dessine
+StepSnapshot +-down- HouseStats
 @enduml

@@ -1,4 +1,5 @@
-@startuml
+@startuml activityDiagram
+skinparam defaultFontName Arial
 title Diagramme d’activité de l’algorithme global
 ' Diagramme d'activité : boucle des pas de temps (Simulation.run)
 ' et boucle de déplacement d'un agent (LivingBeing.move).

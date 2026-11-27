@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>GameOfThrones MAS — Rapport</title>
+<style>
+  @page { size: A4 portrait; margin: 0; }
+  @page landscape { size: A4 landscape; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 9pt; line-height: 1.33; color: #222; }
+  .page { width: 210mm; height: 297mm; padding: 13mm 15mm 13mm; position: relative; overflow: hidden;
+          page-break-after: always; break-after: page; }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+  .page.land { page: landscape; width: 297mm; height: 210mm; padding: 9mm 10mm; }
+  .folio { position: absolute; bottom: 7mm; left: 16mm; right: 16mm; font-size: 7.5pt; color: #888;
+           display: flex; justify-content: space-between; border-top: 0.3pt solid #ccc; padding-top: 1.5mm; }
+  .land .folio { left: 10mm; right: 10mm; bottom: 4mm; }
+  h1 { font-size: 15pt; margin: 0 0 2mm; color: #7a1f1f; }
+  h2 { font-size: 11.5pt; margin: 3.2mm 0 1.4mm; color: #7a1f1f; border-bottom: 0.6pt solid #d8c7a8; padding-bottom: 0.8mm; }
+  h2:first-child { margin-top: 0; }
+  h3 { font-size: 9.6pt; margin: 2mm 0 0.6mm; color: #333; }
+  p { margin: 0 0 1.6mm; text-align: justify; }
+  ul { margin: 0 0 1.6mm; padding-left: 5mm; }
+  li { margin-bottom: 0.6mm; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 8.6pt; background: #f4f0e8; padding: 0 1px; border-radius: 2px; }
+  pre { font-family: Consolas, "Courier New", monospace; font-size: 7.5pt; line-height: 1.25; background: #f7f4ee;
+        border-left: 2.2pt solid #c9a24a; padding: 1.6mm 2.6mm; margin: 1mm 0 2mm; white-space: pre; }
+  table { border-collapse: collapse; width: 100%; margin: 1mm 0 2.2mm; font-size: 8pt; }
+  th, td { border: 0.4pt solid #cfc6b4; padding: 0.6mm 1.5mm; vertical-align: top; text-align: left; }
+  th { background: #efe8da; font-weight: 600; }
+  .ok { color: #1d6b2f; font-weight: 600; white-space: nowrap; }
+  .part { color: #a0620a; font-weight: 600; white-space: nowrap; }
+  .no { color: #9b2222; font-weight: 600; white-space: nowrap; }
+  .cols { display: flex; gap: 6mm; }
+  .cols > div { flex: 1; min-width: 0; }
+  .cap { font-size: 8pt; color: #666; text-align: center; margin-top: 1mm; }
+  .note { font-size: 8.4pt; background: #faf6ec; border: 0.4pt solid #e2d6bb; padding: 1.6mm 2.4mm; margin: 1.5mm 0; }
+
+  /* Couverture */
+  .cover { display: flex; flex-direction: column; padding: 22mm 20mm 16mm; }
+  .cover .school { font-size: 10pt; color: #666; letter-spacing: 0.04em; text-transform: uppercase; }
+  .cover .title { font-size: 30pt; font-weight: 700; color: #7a1f1f; margin: 14mm 0 2mm; line-height: 1.1; }
+  .cover .subtitle { font-size: 14pt; color: #444; margin-bottom: 10mm; }
+  .cover img { width: 100%; border: 0.5pt solid #d8c7a8; }
+  .cover .meta { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; font-size: 10.5pt; }
+  .cover .team { line-height: 1.6; }
+  .cover .team b { display: block; font-size: 9pt; color: #7a1f1f; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1mm; }
+  .cover .right { text-align: right; color: #555; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- =============================== PAGE 1 : COUVERTURE =============================== -->
+<section class="page cover">
+  <div class="school">JUNIA ISEN Lille · M2 · Concept Objet — mini-projet</div>
+  <div class="title">GameOfThrones MAS</div>
+  <div class="subtitle">Simulation multi-agents polymorphe en Java :<br>quatre maisons se disputent les messages du royaume</div>
+  <img src="img/gui.png" alt="Interface graphique de la simulation au pas 60">
+  <div class="cap">Interface graphique (Swing) au pas 60 de la partie par défaut (graine 42).</div>
+  <div class="meta">
+    <div class="team">
+      <b>Équipe</b>
+      César Dablemont<br>
+      Olivier Clavier<br>
+      James Lemoine
+    </div>
+    <div class="right">
+      Enseignant : Samuel Deleplanque<br>
+      Langage : Java 21 · Maven · version 1.1.0<br>
+      Novembre 2026
+    </div>
+  </div>
+</section>
+
+<!-- =============================== PAGE 2 : PROJET ET RÈGLES =============================== -->
+<section class="page">
+  <h2>1. Le projet</h2>
+  <p>Le système multi-agents (SMA) simule, sur une carte en deux dimensions, quatre maisons de l'univers <i>Game of Thrones</i>.
+  Chaque maison possède un <b>Maître</b> immobile au centre de sa SafeZone et six agents mobiles qui parcourent la carte
+  pour collecter des messages et les lui rapporter. Au départ, chaque maison reçoit 10 messages distincts (40 au total,
+  de <code>STARK-01</code> à <code>WHITE_WALKER-10</code>). La maison gagnante est la plus « sage » : celle dont le Maître détient le plus de messages distincts.</p>
+
+  <table>
+    <tr><th>Maison</th><th>Alliance</th><th>Maître (singleton)</th><th>SafeZone</th><th>Distance max.</th><th>EP max.</th><th>Attaque / Défense</th></tr>
+    <tr><td>Stark <code>s</code></td><td>Good (Libération)</td><td>Jon Snow <code>S</code></td><td>haut gauche</td><td>2 cases</td><td>100</td><td>2 / 3</td></tr>
+    <tr><td>Targaryen <code>t</code></td><td>Good (Libération)</td><td>Daenerys <code>T</code></td><td>bas droite</td><td>4 cases</td><td>100</td><td>3 / 1</td></tr>
+    <tr><td>Lannister <code>l</code></td><td>Bad (Domination)</td><td>Cersei <code>L</code></td><td>bas gauche</td><td>3 cases</td><td>100</td><td>2 / 3</td></tr>
+    <tr><td>Marcheurs Blancs <code>w</code></td><td>Bad (Domination)</td><td>Roi de la Nuit <code>W</code></td><td>haut droite</td><td>2 cases</td><td>150</td><td>2 / 2</td></tr>
+  </table>
+  <p>Les deux alliances reprennent le schéma du sujet (<code>Good</code> / <code>Bad</code>). L'alliance Domination est une alliance de circonstance :
+  les Lannister ignorent la menace du Nord pour écraser les Stark. Les profils sont volontairement contrastés (les dragons Targaryen vont loin mais
+  se défendent mal, les Marcheurs Blancs sont lents mais infatigables) pour que le polymorphisme ait un effet visible sur la partie.</p>
+
+  <h2>2. Règles de la simulation</h2>
+  <h3>Carte (<code>Map</code>, <code>Tile</code>, <code>Position</code>, <code>Direction</code>)</h3>
+  <ul>
+    <li>Grille de 30 × 20 cases repérées par un indice horizontal <code>x</code> et un indice vertical <code>y</code>. Chaque case contient au plus une entité (rocher ou être vivant).</li>
+    <li>Une SafeZone de 7 × 5 cases dans chaque coin : 4 × 35 = 140 cases, soit 23 % de la carte (le sujet demande moins de la moitié).</li>
+    <li>Des rochers sont placés au hasard hors SafeZone (probabilité 6 % par case). Seule la maison propriétaire entre dans sa SafeZone : pour les autres, son contour agit comme un obstacle (<code>Map.canEnter</code>).</li>
+    <li><code>Map.getNeighbours(p)</code> renvoie les cases voisines, diagonales comprises : 3 dans un coin, 5 sur un bord, 8 ailleurs (testé par <code>MapTest</code>).
+        <code>Map.getDirectionToSafeZone(p, house)</code> renvoie la direction à prendre pour rejoindre sa SafeZone.</li>
+  </ul>
+  <h3>Pas de temps et déplacements (<code>Simulation</code>, <code>LivingBeing.move</code>)</h3>
+  <ul>
+    <li>À chaque pas, la liste des agents mobiles est mélangée par le générateur aléatoire, puis chaque agent encore actif joue un tour avec <code>move()</code>. Chaque action s'applique immédiatement, avant l'agent suivant.</li>
+    <li><b>EP ≥ 20 %</b> : direction (parmi 8) et distance (de 1 à la distance maximale de la maison) tirées au hasard, en ligne droite, comme une Reine aux échecs à portée limitée.</li>
+    <li><b>EP &lt; 20 %</b> : l'agent se dirige vers sa SafeZone. Il y récupère 20 EP par pas et n'en repart qu'au-dessus de 80 % : cette hystérésis évite les allers-retours en bordure de zone.</li>
+    <li>Chaque case parcourue hors de sa SafeZone coûte 1 EP. <b>Bloqué</b> par un obstacle ou un bord, l'agent s'arrête devant et perd les EP du trajet restant ; au tour suivant il repart dans une direction différente de <code>lastDirection</code>.</li>
+    <li><b>EP = 0</b> : l'agent devient un obstacle (<code>x</code>), ne bouge plus et perd tous ses messages.</li>
+  </ul>
+  <h3>Rencontres et livraison (<code>Encounter</code>, <code>MessageBag</code>)</h3>
+  <ul>
+    <li>Une rencontre n'a lieu que si l'autre être se trouve <b>sur le chemin prévu</b> ; finir son trajet juste devant lui ne déclenche rien.</li>
+    <li><b>Même maison</b> : union des messages. <b>Même alliance</b> : chacun copie de 1 à 3 messages qu'il n'a pas. <b>Ennemis</b> : chacun lance un dé à 6 faces, l'attaquant ajoute son attaque, le défenseur sa défense ; le vainqueur prend au perdant jusqu'à 3 messages qu'il n'a pas encore (le perdant les perd). Égalité : rien ne se passe. Aucune confrontation n'a lieu dans une SafeZone.</li>
+    <li><code>MessageBag</code> refuse les doublons : chaque ajout vérifie d'abord que le message n'existe pas déjà (testé par <code>MessageBagTest</code>).</li>
+    <li><b>Livraison</b> : un agent qui passe à une case de son Maître lui transmet tous ses messages ; le score d'une maison est le nombre de messages distincts du Maître.</li>
+  </ul>
+  <h3>Fin de partie</h3>
+  <p>La partie s'arrête quand un Maître détient les 40 messages, quand plus aucun agent n'est actif (condition ajoutée) ou après 300 pas.
+  Le Maître qui a le plus de messages gagne ; une égalité en tête donne un match nul. Tous les réglages sont centralisés dans <code>Config</code>.</p>
+  <div class="folio"><span>GameOfThrones MAS — Concept Objet M2</span><span>2 / 6</span></div>
+</section>
+
+<!-- =============================== PAGE 3 : CONCEPTS OBJET =============================== -->
+<section class="page">
+  <h2>3. Les trois concepts fondamentaux de l'objet</h2>
+  <h3>Encapsulation</h3>
+  <p>Tous les attributs sont privés et ne sont accessibles que par des méthodes. L'état d'un agent (<code>ep</code>, <code>returningHome</code>,
+  <code>exhausted</code>, <code>blockedLastTurn</code>) ne change qu'à l'intérieur de <code>LivingBeing</code>, par des méthodes privées comme
+  <code>spendEp()</code> ou <code>recharge()</code> qui bornent les EP entre 0 et le maximum. La cohérence entre une case et son occupant est
+  garantie par <code>Map</code> : <code>Tile.setOccupant()</code> est de visibilité paquetage et <code>Map.moveEntity()</code> est la seule méthode qui
+  déplace une entité en jeu. Les listes exposées le sont en lecture seule (<code>Collections.unmodifiableList</code>), et <code>Position</code> est un
+  <code>record</code> immuable.</p>
+
+  <h3>Héritage</h3>
+  <p>La hiérarchie suit l'énoncé sur quatre niveaux : <code>Entity</code> (tout ce qui occupe une case) → <code>LivingBeing</code> (messages, EP,
+  dernière direction) → alliance <code>Good</code> / <code>Bad</code> → maison <code>Stark</code>, <code>Targaryen</code>, <code>Lannister</code>,
+  <code>WhiteWalker</code> → Maître (<code>StarkMaster</code>, …). Le Maître est donc bien une <i>spécialisation de son groupe</i>, comme le demande
+  le sujet. <code>Rock</code> hérite aussi d'<code>Entity</code> : rochers et agents épuisés sont traités de la même manière par la carte.
+  <code>Entity</code>, <code>LivingBeing</code>, <code>Good</code> et <code>Bad</code> sont abstraites ; l'interface <code>Master</code> regroupe ce
+  que partagent les quatre Maîtres (collecte et score, en méthodes par défaut).</p>
+
+  <h3>Polymorphisme</h3>
+  <p>Le moteur ne connaît que le type <code>LivingBeing</code> : il appelle <code>move()</code> sans savoir quelle maison joue. La liaison dynamique
+  choisit à l'exécution la distance, le coût, l'attaque et la défense redéfinis par chaque maison, ainsi que <code>isAlly()</code> redéfinie par
+  chaque alliance. Les Maîtres redéfinissent <code>move()</code> pour rester immobiles et <code>getSymbol()</code> pour s'afficher en majuscule.</p>
+  <div class="cols">
+<div><pre>// Simulation.playStep()
+RandomGenerator.getInstance().shuffle(movingBeings);
+for (LivingBeing being : movingBeings) {
+    if (being.isActive()) {
+        being.move(map, log); // liaison dynamique
+    }
+}</pre></div>
+<div><pre>// Targaryen : les dragons vont loin
+@Override protected int getMaxDistance() { return 4; }
+@Override public int getAttack()  { return 3; }
+@Override public int getDefense() { return 1; }
+
+// Bad : définition de l'alliance
+@Override public boolean isAlly(LivingBeing o) {
+    return o instanceof Bad; }</pre></div>
+  </div>
+  <p>Le même mécanisme sert à la carte (<code>Entity.getSymbol()</code>, <code>isObstacle()</code>) et à l'affichage (interface <code>Display</code>, ci-dessous).</p>
+
+  <h3>Attributs statiques</h3>
+  <p>Chaque classe concrète possède un compteur <code>private static int count</code> incrémenté dans son constructeur : <code>Rock</code>,
+  <code>LivingBeing</code> (tous les êtres) et chacune des quatre maisons (Maître compris, puisqu'il en hérite). Ces compteurs sont affichés à chaque pas :
+  <code>Instances (Maître compris) : Stark 7 | Targaryen 7 | Lannister 7 | Marcheurs 7 | êtres vivants 28 | rochers 27</code>.</p>
+
+  <h2>4. Patrons de conception</h2>
+  <h3>Singleton (4 Maîtres + générateur aléatoire)</h3>
+  <p>Chaque maison n'a qu'un seul Maître : le constructeur est privé, l'instance unique est un attribut statique créé au premier appel de
+  <code>getInstance()</code>. Toute tentative de <code>new StarkMaster()</code> est refusée à la compilation, et les agents retrouvent leur Maître
+  par <code>getMaster()</code> sans qu'on ait à leur passer une référence. Le patron intervient dans les quatre classes demandées.</p>
+<pre>public final class StarkMaster extends Stark implements Master {
+    private static StarkMaster instance;
+    private StarkMaster() { super("Jon Snow"); }          // impossible d'en créer un second
+    public static StarkMaster getInstance() {
+        if (instance == null) { instance = new StarkMaster(); }
+        return instance;
+    }
+    @Override public void move(Map map, EventLog log) { } // le Maître reste immobile
+}</pre>
+  <p><code>RandomGenerator</code>, la classe dédiée aux nombres pseudo-aléatoires exigée par le sujet, est aussi un singleton : toute la partie
+  (rochers, ordre des agents, directions, distances, échanges, dés) dépend d'une seule graine. Une même graine rejoue exactement la même partie
+  (<code>--seed N</code>), ce qui a rendu le débogage et l'équilibrage reproductibles.</p>
+
+  <h3>Stratégie (second patron, bonus)</h3>
+  <p><code>Simulation</code> reçoit un objet <code>Display</code> (<code>showIntro</code>, <code>render</code>, <code>showResult</code>) sans savoir
+  s'il s'agit de <code>ConsoleDisplay</code> (ASCII) ou de <code>SwingDisplay</code> (fenêtre graphique). On change d'affichage au lancement
+  (<code>--gui</code>) sans toucher au moteur. La fenêtre dessine une copie figée de l'état (<code>StepSnapshot</code>) pour ne jamais lire un état
+  en cours de modification par le thread de simulation.</p>
+  <div class="folio"><span>GameOfThrones MAS — Concept Objet M2</span><span>3 / 6</span></div>
+</section>
+
+<!-- =============================== PAGE 4 : DIAGRAMME DE CLASSES (PAYSAGE) =============================== -->
+<section class="page land">
+  <h2 style="margin:0 0 1mm">5. Diagramme de classes complet</h2>
+  <p style="font-size:8.2pt;margin-bottom:1.5mm">Toutes les classes, avec tous leurs attributs et méthodes et leur visibilité
+  (<code>+</code> public, <code>-</code> privé, <code>#</code> protégé, <code>~</code> paquetage ; membres statiques soulignés).
+  L'image est en haute définition (6960 × 3174 px) : zoomer dans le PDF pour lire le détail. Source PlantUML : <code>docs/uml/classDiagram.puml</code>.</p>
+  <img src="../uml/classDiagram.png" alt="Diagramme de classes" style="width:100%; display:block; border:0.4pt solid #ddd;">
+  <div class="folio"><span>GameOfThrones MAS — Concept Objet M2</span><span>4 / 6</span></div>
+</section>
+
+<!-- =============================== PAGE 5 : ÉTATS ET ACTIVITÉ =============================== -->
+<section class="page">
+  <h2>6. Diagrammes d'états et d'activité</h2>
+  <div class="cols" style="gap:7mm">
+    <div style="flex:0 0 82mm">
+      <h3 style="margin-top:0">Diagramme d'états d'un agent mobile</h3>
+      <img src="../uml/stateDiagram.png" alt="Diagramme d'états" style="width:100%">
+      <p style="margin-top:2mm">Un agent démarre en <b>Exploration</b>, EP au maximum. Sous 20 % d'EP il passe en <b>Retour</b> et suit
+      <code>getDirectionToSafeZone()</code> ; s'il est bloqué, il essaie une autre direction. Arrivé à côté de son Maître, il se met en
+      <b>Repos</b> et recharge ses EP. Il ne repart en exploration qu'au-dessus de 80 %. Dans tous les états mobiles, une chute à 0 EP le fait
+      passer définitivement à l'état <b>Épuisé</b> : il devient un obstacle et perd ses messages.</p>
+      <p>Ces états correspondent aux attributs privés de <code>LivingBeing</code> : <code>returningHome</code>, <code>exhausted</code>
+      et la position par rapport au Maître (<code>isNextToMaster()</code>).</p>
+      <h3>Lecture de l'algorithme global</h3>
+      <p>Le diagramme d'activité (à droite) contient les deux boucles demandées par le sujet :</p>
+      <ul>
+        <li>la <b>boucle des pas de temps</b> (<code>Simulation.run</code>), qui tourne tant qu'aucune condition de fin n'est atteinte et
+        affiche la carte, les scores, les instances et les événements après chaque pas ;</li>
+        <li>la <b>boucle de déplacement</b> (<code>LivingBeing.walk</code>), qui fait avancer l'agent case par case et s'arrête sur
+        une rencontre, un obstacle ou un épuisement.</li>
+      </ul>
+      <p>Entre les deux, la liste des agents est mélangée à chaque pas : l'ordre de jeu change toujours.</p>
+    </div>
+    <div style="flex:1; text-align:center">
+      <h3 style="margin-top:0; text-align:left">Diagramme d'activité de la simulation</h3>
+      <img src="../uml/activityDiagram.png" alt="Diagramme d'activité" style="height:238mm; max-width:100%">
+    </div>
+  </div>
+  <div class="folio"><span>GameOfThrones MAS — Concept Objet M2</span><span>5 / 6</span></div>
+</section>
+
+<!-- =============================== PAGE 6 : RÉSULTATS, CONFORMITÉ, RÔLES =============================== -->
+<section class="page">
+  <h2>7. Affichage et résultats</h2>
+  <p>La console affiche à chaque pas la carte en ASCII (majuscule = Maître, minuscule = agent, <code>x</code> = épuisé, <code>#</code> = rocher,
+  <code>,</code> = SafeZone), un tableau par maison (score, agents actifs et épuisés, EP moyens), les compteurs d'instances et le journal des
+  événements (partages, échanges, confrontations avec les dés, livraisons, épuisements), avec une pause de 150 ms entre deux pas. La fenêtre
+  graphique ajoute la pause, le pas à pas et un curseur de vitesse. Sur 60 parties (graines 1 à 60, une JVM par partie) :</p>
+  <table>
+    <tr><th>Maison</th><th>Victoires</th><th>Score moyen /40</th><th>Agents épuisés en fin de partie (moy. /6)</th></tr>
+    <tr><td>Stark</td><td>18</td><td>32,7</td><td>1,6</td></tr>
+    <tr><td>Lannister</td><td>17</td><td>31,7</td><td>2,5</td></tr>
+    <tr><td>Marcheurs Blancs</td><td>12</td><td>31,1</td><td>0,6</td></tr>
+    <tr><td>Targaryen</td><td>10</td><td>29,3</td><td>3,8</td></tr>
+    <tr><td colspan="4">3 matchs nuls · 20 parties terminées par la collecte des 40 messages, 40 par la limite de 300 pas (durée moyenne 276 pas, minimum 143).</td></tr>
+  </table>
+  <p>Aucune maison ne domine. Les Targaryen, qui vont loin et dépensent beaucoup, s'épuisent le plus : leur avantage de mobilité est compensé par le
+  coût en EP, ce qui montre l'effet des redéfinitions polymorphes sur l'équilibre.</p>
+
+  <h2>8. Conformité au sujet</h2>
+  <table>
+    <tr><th style="width:36%">Exigence</th><th>Réalisation dans le code</th><th style="width:11%">Statut</th></tr>
+    <tr><td>SMA à pas constant, ordre aléatoire à chaque pas</td><td><code>Simulation.playStep()</code> + <code>RandomGenerator.shuffle()</code></td><td class="ok">Fait</td></tr>
+    <tr><td>Carte n × m, SafeZones &lt; 50 %, obstacles, voisins 3/5/8, direction vers la SafeZone</td><td><code>Map</code> : 23 % de SafeZones, rochers aléatoires, <code>getNeighbours</code>, <code>getDirectionToSafeZone</code></td><td class="ok">Fait</td></tr>
+    <tr><td>Règles d'EP (20 %, retour, 0 EP = obstacle, blocage)</td><td><code>LivingBeing.move / walk / hitObstacle</code></td><td class="ok">Fait</td></tr>
+    <tr><td>Rencontres sur le chemin, union sans doublon, échange, confrontation hors SafeZone</td><td><code>Encounter</code>, <code>MessageBag</code></td><td class="ok">Fait</td></tr>
+    <tr><td>Encapsulation, héritage, polymorphisme</td><td>Sections 3 et 5</td><td class="ok">Fait</td></tr>
+    <tr><td>Attributs statiques pour compter les instances</td><td>Compteurs dans <code>Rock</code>, <code>LivingBeing</code> et les 4 maisons</td><td class="ok">Fait</td></tr>
+    <tr><td>Singleton dans 4 classes</td><td>Les 4 Maîtres (+ <code>RandomGenerator</code>)</td><td class="ok">Fait</td></tr>
+    <tr><td>Classe dédiée aux nombres pseudo-aléatoires</td><td><code>RandomGenerator</code>, graine unique et paramétrable</td><td class="ok">Fait</td></tr>
+    <tr><td>Représentation graphique, maximum d'infos par pas</td><td>Console ASCII + fenêtre Swing</td><td class="ok">Fait</td></tr>
+    <tr><td>UML : classes complet, états, activité</td><td><code>docs/uml/*.puml</code> (sections 5 et 6)</td><td class="ok">Fait</td></tr>
+    <tr><td>Bonus : second patron · statistiques multi-parties</td><td>Stratégie (<code>Display</code>) · 60 graines, lancées une par une (pas de mode « campagne » dans le code)</td><td class="part">Fait / partiel</td></tr>
+    <tr><td>Bonus : événements aléatoires, plus court chemin, 3D, agents coordonnés</td><td>Non réalisés</td><td class="no">Non</td></tr>
+  </table>
+  <p><b>Limites relevées.</b> Après une rencontre, l'agent ne mémorise pas de blocage et peut retenter la même direction au tour suivant. Le retour
+  vers la SafeZone suit une direction « à vol d'oiseau », sans contourner les rochers (d'où l'intérêt du bonus plus court chemin). Les tests
+  unitaires couvrent la carte et le sac de messages, mais pas encore les rencontres ni le cycle des EP. Les Maîtres, singletons, ne peuvent pas être
+  réinitialisés : plusieurs parties dans une même JVM demanderaient une méthode de remise à zéro.</p>
+
+  <h2>9. Rôles dans l'équipe</h2>
+  <ul>
+    <li><b>Membre A</b> — architecture logicielle et développement : moteur de simulation, carte, entités, rencontres, affichages console et graphique, intégration continue (GitHub Actions).</li>
+    <li><b>Membre B</b> — conception : première version du diagramme de classes et modélisation UML de la hiérarchie des êtres vivants.</li>
+    <li><b>Membre C</b> — analyse du sujet et validation : vérification de la conformité du code à l'énoncé, campagne de 60 parties, rédaction du rapport.</li>
+  </ul>
+  <p>Le travail a été découpé en petites demandes de fusion (une fonctionnalité par <i>pull request</i>), compilées et testées par la CI avant intégration sur la branche principale.</p>
+  <div class="folio"><span>GameOfThrones MAS — Concept Objet M2</span><span>6 / 6</span></div>
+</section>
+
+</body>
+</html>

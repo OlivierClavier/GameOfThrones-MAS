@@ -1,4 +1,5 @@
 @startuml
+skinparam defaultFontName Arial
 title Diagramme d'états d'un agent mobile
 ' Diagramme d'états-transitions d'un agent mobile (méthode LivingBeing.move).
 skinparam stateBorderColor #555555
